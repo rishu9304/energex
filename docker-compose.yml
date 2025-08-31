@@ -1,0 +1,127 @@
+services:
+  # Lumen PHP API
+  lumen:
+    build:
+      context: ./lumen-api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=mysql
+      - DB_DATABASE=energex
+      - DB_USERNAME=energex
+      - DB_PASSWORD=secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-secret-key
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - energex-network
+    restart: unless-stopped
+
+  # Node.js Cache Service
+  node-cache:
+    build:
+      context: ./node-cache
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DB_HOST=mysql
+      - DB_DATABASE=energex
+      - DB_USERNAME=energex
+      - DB_PASSWORD=secret
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - energex-network
+    restart: unless-stopped
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - REACT_APP_API_URL=http://lumen:8000/api
+      - REACT_APP_CACHE_URL=http://node-cache:3000
+    depends_on:
+      - lumen
+      - node-cache
+    networks:
+      - energex-network
+    restart: unless-stopped
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: energex
+      MYSQL_USER: energex
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - energex-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - energex-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+      retries: 5
+      interval: 5s
+      start_period: 10s
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./lumen-api/public:/var/www/html/public
+    depends_on:
+      - lumen
+      - frontend
+    networks:
+      - energex-network
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  redis-data:
+
+networks:
+  energex-network:
+    driver: bridge

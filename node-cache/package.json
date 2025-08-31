@@ -1,0 +1,43 @@
+{
+  "name": "energex-node-cache",
+  "version": "1.0.0",
+  "description": "Node.js TypeScript cache service with Redis for Energex API",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "keywords": ["node", "typescript", "redis", "cache", "api"],
+  "author": "Energex Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "redis": "^4.6.5",
+    "mysql2": "^3.2.0",
+    "cors": "^2.8.5",
+    "helmet": "^6.1.5",
+    "dotenv": "^16.0.3",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.15.11",
+    "@types/cors": "^2.8.13",
+    "@types/compression": "^1.7.2",
+    "@types/jest": "^29.5.1",
+    "@types/supertest": "^2.0.12",
+    "typescript": "^5.0.4",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.39.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1"
+  }
+}
