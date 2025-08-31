@@ -7,13 +7,18 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - APP_NAME=Energex
+      - APP_ENV=local
+      - APP_DEBUG=true
       - DB_HOST=mysql
       - DB_DATABASE=energex
       - DB_USERNAME=energex
       - DB_PASSWORD=secret
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=your-secret-key
+      - REDIS_CLIENT=predis
+      - CACHE_DRIVER=redis
+      - JWT_SECRET=energex_jwt_secret_key_2024_very_long_and_secure_random_string_12345
     depends_on:
       mysql:
         condition: service_healthy

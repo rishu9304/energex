@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Laravel\Lumen\Routing\Controller;
 
 /**
  * Authentication Controller
@@ -40,6 +41,8 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
+            // JWT secret is configured via environment variables
+            
             $token = JWTAuth::fromUser($user);
 
             return response()->json([
@@ -82,6 +85,8 @@ class AuthController extends Controller
 
             $credentials = $request->only('email', 'password');
 
+            // JWT secret is configured via environment variables
+            
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
                     'success' => false,

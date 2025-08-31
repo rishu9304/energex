@@ -17,6 +17,17 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
+// Debug route to check JWT configuration
+$router->get('/debug/jwt', function () use ($router) {
+    return response()->json([
+        'jwt_secret' => config('jwt.secret'),
+        'jwt_secret_length' => strlen(config('jwt.secret')),
+        'jwt_secret_bits' => strlen(config('jwt.secret')) * 8,
+        'env_jwt_secret' => env('JWT_SECRET'),
+        'env_jwt_secret_key' => env('JWT_SECRET_KEY'),
+    ]);
+});
+
 // API Routes
 $router->group(['prefix' => 'api'], function () use ($router) {
     

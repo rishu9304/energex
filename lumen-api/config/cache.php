@@ -4,6 +4,9 @@ return [
     'default' => env('CACHE_DRIVER', 'redis'),
 
     'stores' => [
+        'array' => [
+            'driver' => 'array',
+        ],
         'redis' => [
             'driver' => 'redis',
             'connection' => 'default',

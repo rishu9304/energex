@@ -61,7 +61,9 @@ $app->singleton(
 $app->configure('app');
 $app->configure('database');
 $app->configure('cache');
+$app->configure('redis');
 $app->configure('auth');
+$app->configure('jwt');
 
 /*
 |--------------------------------------------------------------------------
@@ -95,6 +97,9 @@ $app->routeMiddleware([
 
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
+
+// JWT secret is configured via environment variables
+
 $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->register(Illuminate\Redis\RedisServiceProvider::class);
 

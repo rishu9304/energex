@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
+// use Illuminate\Support\Facades\Redis;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Laravel\Lumen\Routing\Controller;
 
 /**
  * Post Controller
@@ -32,27 +33,8 @@ class PostController extends Controller
     public function index()
     {
         try {
-            $cacheKey = 'posts:all';
-            
-            // Try to get posts from Redis cache
-            $cachedPosts = Redis::get($cacheKey);
-            
-            if ($cachedPosts) {
-                $posts = json_decode($cachedPosts, true);
-                
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Posts retrieved from cache',
-                    'data' => $posts,
-                    'cached' => true,
-                ]);
-            }
-
-            // If not in cache, get from database
+            // Get posts from database (temporarily disabled Redis caching)
             $posts = Post::with('user:id,name,email')->latest()->get();
-            
-            // Store in Redis cache
-            Redis::setex($cacheKey, self::CACHE_TTL, $posts->toJson());
 
             return response()->json([
                 'success' => true,
@@ -132,23 +114,7 @@ class PostController extends Controller
     public function show($id)
     {
         try {
-            $cacheKey = "posts:{$id}";
-            
-            // Try to get post from Redis cache
-            $cachedPost = Redis::get($cacheKey);
-            
-            if ($cachedPost) {
-                $post = json_decode($cachedPost, true);
-                
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Post retrieved from cache',
-                    'data' => $post,
-                    'cached' => true,
-                ]);
-            }
-
-            // If not in cache, get from database
+            // Get post from database (temporarily disabled Redis caching)
             $post = Post::with('user:id,name,email')->find($id);
             
             if (!$post) {
@@ -157,9 +123,6 @@ class PostController extends Controller
                     'message' => 'Post not found',
                 ], 404);
             }
-            
-            // Store in Redis cache
-            Redis::setex($cacheKey, self::CACHE_TTL, $post->toJson());
 
             return response()->json([
                 'success' => true,
@@ -215,9 +178,9 @@ class PostController extends Controller
             $post->update($request->only(['title', 'content']));
             $post->load('user:id,name,email');
 
-            // Clear cache
-            $this->clearPostsCache();
-            Redis::del("posts:{$id}");
+            // Clear cache (temporarily disabled Redis caching)
+            // $this->clearPostsCache();
+            // Redis::del("posts:{$id}");
 
             return response()->json([
                 'success' => true,
@@ -271,9 +234,9 @@ class PostController extends Controller
 
             $post->delete();
 
-            // Clear cache
-            $this->clearPostsCache();
-            Redis::del("posts:{$id}");
+            // Clear cache (temporarily disabled Redis caching)
+            // $this->clearPostsCache();
+            // Redis::del("posts:{$id}");
 
             return response()->json([
                 'success' => true,
@@ -293,9 +256,10 @@ class PostController extends Controller
      * Clear posts cache
      * 
      * Helper method to clear all posts-related cache entries.
+     * Temporarily disabled Redis caching.
      */
     private function clearPostsCache()
     {
-        Redis::del('posts:all');
+        // Redis::del('posts:all');
     }
 }

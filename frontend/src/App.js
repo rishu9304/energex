@@ -13,6 +13,8 @@ function App() {
   const [useCache, setUseCache] = useState(true);
   const [message, setMessage] = useState('');
   const [showRegister, setShowRegister] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [showPostModal, setShowPostModal] = useState(false);
 
   // Login form state
   const [loginData, setLoginData] = useState({
@@ -78,6 +80,28 @@ function App() {
     setLoading(false);
   };
 
+  const fetchPostById = async (postId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        setSelectedPost(response.data.data);
+        setShowPostModal(true);
+      } else {
+        setMessage('Error loading post: ' + response.data.message);
+      }
+    } catch (error) {
+      setMessage('Error loading post: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const closePostModal = () => {
+    setShowPostModal(false);
+    setSelectedPost(null);
+  };
+
   const login = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -129,6 +153,8 @@ function App() {
     setPosts([]);
     setMessage('Logged out successfully');
     setShowRegister(false);
+    setSelectedPost(null);
+    setShowPostModal(false);
   };
 
   const createPost = async (e) => {
@@ -315,12 +341,15 @@ function App() {
           ) : (
             <div className="posts-grid">
               {posts.map(post => (
-                <div key={post.id} className="post-card">
+                <div key={post.id} className="post-card" onClick={() => fetchPostById(post.id)}>
                   <h4>{post.title}</h4>
                   <p>{post.content}</p>
                   <div className="post-meta">
                     <small>By: {post.user?.name || 'Unknown'}</small>
                     <small>Created: {new Date(post.created_at).toLocaleDateString()}</small>
+                  </div>
+                  <div className="post-actions">
+                    <button className="view-btn">👁️ View Details</button>
                   </div>
                 </div>
               ))}
@@ -333,6 +362,43 @@ function App() {
             </div>
           )}
         </div>
+
+        {/* Post Modal */}
+        {showPostModal && selectedPost && (
+          <div className="modal-overlay" onClick={closePostModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>{selectedPost.title}</h2>
+                <button className="close-btn" onClick={closePostModal}>×</button>
+              </div>
+              <div className="modal-body">
+                <div className="post-content">
+                  <p>{selectedPost.content}</p>
+                </div>
+                <div className="post-details">
+                  <div className="detail-item">
+                    <strong>Author:</strong> {selectedPost.user?.name || 'Unknown'}
+                  </div>
+                  <div className="detail-item">
+                    <strong>Email:</strong> {selectedPost.user?.email || 'Unknown'}
+                  </div>
+                  <div className="detail-item">
+                    <strong>Created:</strong> {new Date(selectedPost.created_at).toLocaleString()}
+                  </div>
+                  <div className="detail-item">
+                    <strong>Last Updated:</strong> {new Date(selectedPost.updated_at).toLocaleString()}
+                  </div>
+                  <div className="detail-item">
+                    <strong>Post ID:</strong> {selectedPost.id}
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button onClick={closePostModal} className="close-modal-btn">Close</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
