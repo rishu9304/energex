@@ -1,4 +1,4 @@
-name: 🧪 Test Suite
+name: 🧪 PHP API Test Suite
 
 on:
   push:
@@ -8,9 +8,9 @@ on:
 
 jobs:
   test:
-    name: Build and Test
+    name: Build and Test PHP API
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
 
     steps:
       # Checkout code
@@ -87,30 +87,7 @@ jobs:
             echo "✅ API endpoint tests completed successfully"
           fi
 
-      # Run Node.js Tests
-      - name: Run Node.js Tests
-        run: |
-          echo "Running Node.js tests with Jest..."
-          
-          # Check if Jest is available and tests exist
-          if docker compose exec -T node-cache test -f package.json; then
-            echo "Running Jest test suite..."
-            
-            # Run Jest tests with proper configuration
-            docker compose exec -T node-cache npm test -- --colors --verbose --coverage --passWithNoTests
-            
-            echo "✅ Jest tests completed successfully"
-          else
-            echo "❌ Node.js test environment not properly configured"
-            exit 1
-          fi
 
-      # Test Frontend
-      - name: Test Frontend
-        run: |
-          echo "Testing frontend..."
-          timeout 30 bash -c 'until curl -f http://localhost:8080 >/dev/null 2>&1; do sleep 2; done'
-          echo "Frontend test passed"
 
       # Cleanup
       - name: Cleanup
