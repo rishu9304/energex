@@ -12,11 +12,20 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [useCache, setUseCache] = useState(true);
   const [message, setMessage] = useState('');
+  const [showRegister, setShowRegister] = useState(false);
 
   // Login form state
   const [loginData, setLoginData] = useState({
     email: 'john@example.com',
     password: 'password123'
+  });
+
+  // Registration form state
+  const [registerData, setRegisterData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: ''
   });
 
   // New post form state
@@ -88,12 +97,38 @@ function App() {
     setLoading(false);
   };
 
+  const register = async (e) => {
+    e.preventDefault();
+    if (registerData.password !== registerData.password_confirmation) {
+      setMessage('Passwords do not match');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API_BASE}/register`, registerData);
+      if (response.data.success) {
+        setToken(response.data.token);
+        setUser(response.data.user);
+        localStorage.setItem('token', response.data.token);
+        setMessage('Registration successful! Welcome!');
+        setShowRegister(false);
+      } else {
+        setMessage('Registration failed: ' + response.data.message);
+      }
+    } catch (error) {
+      setMessage('Registration error: ' + (error.response?.data?.message || error.message));
+    }
+    setLoading(false);
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
     setPosts([]);
     setMessage('Logged out successfully');
+    setShowRegister(false);
   };
 
   const createPost = async (e) => {
@@ -127,29 +162,94 @@ function App() {
       <div className="App">
         <div className="container">
           <h1>🚀 Energex Assessment</h1>
-          <div className="login-form">
-            <h2>Login</h2>
-            <form onSubmit={login}>
-              <input
-                type="email"
-                placeholder="Email"
-                value={loginData.email}
-                onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={loginData.password}
-                onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                required
-              />
-              <button type="submit" disabled={loading}>
-                {loading ? 'Logging in...' : 'Login'}
-              </button>
-            </form>
-            {message && <div className="message">{message}</div>}
-          </div>
+          
+          {!showRegister ? (
+            // Login Form
+            <div className="auth-form">
+              <h2>Login</h2>
+              <form onSubmit={login}>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={loginData.email}
+                  onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={loginData.password}
+                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                  required
+                />
+                <button type="submit" disabled={loading}>
+                  {loading ? 'Logging in...' : 'Login'}
+                </button>
+              </form>
+              <div className="auth-switch">
+                <p>Don't have an account? 
+                  <button 
+                    type="button" 
+                    className="link-btn"
+                    onClick={() => setShowRegister(true)}
+                  >
+                    Register here
+                  </button>
+                </p>
+              </div>
+              {message && <div className="message">{message}</div>}
+            </div>
+          ) : (
+            // Registration Form
+            <div className="auth-form">
+              <h2>Register</h2>
+              <form onSubmit={register}>
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={registerData.name}
+                  onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={registerData.email}
+                  onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={registerData.password}
+                  onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={registerData.password_confirmation}
+                  onChange={(e) => setRegisterData({...registerData, password_confirmation: e.target.value})}
+                  required
+                />
+                <button type="submit" disabled={loading}>
+                  {loading ? 'Registering...' : 'Register'}
+                </button>
+              </form>
+              <div className="auth-switch">
+                <p>Already have an account? 
+                  <button 
+                    type="button" 
+                    className="link-btn"
+                    onClick={() => setShowRegister(false)}
+                  >
+                    Login here
+                  </button>
+                </p>
+              </div>
+              {message && <div className="message">{message}</div>}
+            </div>
+          )}
         </div>
       </div>
     );

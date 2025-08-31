@@ -42,7 +42,7 @@
   background: #c82333;
 }
 
-.login-form {
+.auth-form {
   max-width: 400px;
   margin: 0 auto;
   padding: 30px;
@@ -50,7 +50,7 @@
   border-radius: 10px;
 }
 
-.login-form input {
+.auth-form input {
   width: 100%;
   padding: 12px;
   margin: 10px 0;
@@ -59,7 +59,7 @@
   box-sizing: border-box;
 }
 
-.login-form button {
+.auth-form button {
   width: 100%;
   padding: 12px;
   background: #007bff;
@@ -70,13 +70,39 @@
   font-size: 16px;
 }
 
-.login-form button:hover {
+.auth-form button:hover {
   background: #0056b3;
 }
 
-.login-form button:disabled {
+.auth-form button:disabled {
   background: #6c757d;
   cursor: not-allowed;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.auth-switch p {
+  margin: 0;
+  color: #666;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: inherit;
+  margin-left: 5px;
+}
+
+.link-btn:hover {
+  color: #0056b3;
 }
 
 .cache-toggle {
